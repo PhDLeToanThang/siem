@@ -1,7 +1,7 @@
 # Zabbix 6 / 7x
 
 
-Cách 1. Cài bằng cách download bản VM Appliance cho VMware .vmx
+## Cách 1. Cài bằng cách download bản VM Appliance cho VMware .vmx
 
 ![image](https://github.com/user-attachments/assets/7653c841-6264-49eb-ae0f-7861cbcacffd)
 
@@ -32,7 +32,15 @@ Database:
 root:<random>
 zabbix:<random>
 -------------
-Bước 5. Truy cập website
+Bước 5. Truy cập website và chọn mục cấu hình mediatype để fix email gửi: 
 
 ![image](https://github.com/user-attachments/assets/9ec236b8-7015-4765-84b8-d4019f35d828)
+
+Bước 6. Nếu bạn có hệ thống email Doanh nghiệp ( Gmail / MSO365 ):
+
+**MSO365:**
+
+![image](https://github.com/user-attachments/assets/31885d87-3eac-49ea-b393-7080d08b6035)
+
+**Gmail:**
 
