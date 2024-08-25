@@ -5,18 +5,23 @@ Cách 1. Cài bằng cách download bản VM Appliance cho VMware .vmx
 
 ![image](https://github.com/user-attachments/assets/7653c841-6264-49eb-ae0f-7861cbcacffd)
 
-
+Bước 1. Download bản VM Appliance, mình chọn bản cho VMware .vmx:
 https://www.zabbix.com/documentation/6.4/en/manual/appliance
 
-	- phai dung ssh ket noi ESXi, dung lenh: 
+Bước 2.	Dùng Winscp và PuTTy kết nối tới ESXi và dùng lệnh: 
+```ssh
  vmkfstools -i /vmfs/volumes/84-5a7526ef-88e-acb1/zabbix.privatecloud/zabbix_appliance-6.4.18-disk1.vmdk /vmfs/volumes/84-5a7526ef-88e-acb1/zabbix.privatecloud/zabbix_app_6418_d1.vmdk
  
 Destination disk format: VMFS zeroedthick
 Cloning disk '/vmfs/volumes/84-5a7526ef-88e-acb1/zabbix.privatecloud/zabbix_app_6418_d1.vmdk'...
 Clone: 100% done.
-	-	edit settings VM: Add exist HDD NVME controller , VMware Paravirtual. 
+```
 
-System:
+Bước 3. edit settings VM: Add exist HDD NVME controller , VMware Paravirtual và chọn ổ VD kiểu NVME Control 0:0
+
+Bước 4. Bật VM power on và mở Console login
+
+System Access:
 
 root:zabbix
 Zabbix frontend:
@@ -26,3 +31,8 @@ Database:
 
 root:<random>
 zabbix:<random>
+-------------
+Bước 5. Truy cập website
+
+![image](https://github.com/user-attachments/assets/9ec236b8-7015-4765-84b8-d4019f35d828)
+
