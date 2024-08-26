@@ -48,4 +48,6 @@ Sau khi cấu hình, chúng ta test:
 
 
 **Gmail:**
-
+- Không thành công do ArchLinux 8.10 không cho cài ssmtp,
+- Gmail phải bật chế độ Less Security trong khi Account email lại bật MFA/2FA là không khả thi.
+  
