@@ -56,3 +56,4 @@ sudo apt install apt-transport-https ca-certificates curl software-properties-co
 
 #Cập nhật lại danh sách gói phần mềm và cài đặt Docker:
 sudo apt update -y
+reboot
