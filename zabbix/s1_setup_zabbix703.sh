@@ -1,3 +1,9 @@
+#!/bin/bash -e
+###############################
+# 
+#
+#
+
 # ref: https://thangletoan.wordpress.com/2023/06/16/lab-11-cau-hinh-serverlog-tu-elasticsearch-kibana-suricata-filebeat-logstash-tren-ubuntu-22-04-server/
 # Install Elasticsearch, Logstash, Kibana and Filebeat
 sudo apt install nano -y
