@@ -42,5 +42,10 @@ Bước 6. Nếu bạn có hệ thống email Doanh nghiệp ( Gmail / MSO365 ):
 
 ![image](https://github.com/user-attachments/assets/31885d87-3eac-49ea-b393-7080d08b6035)
 
+Sau khi cấu hình, chúng ta test:
+
+![image](https://github.com/user-attachments/assets/e543485e-97d9-4cba-a690-1c496e18a458)
+
+
 **Gmail:**
 
