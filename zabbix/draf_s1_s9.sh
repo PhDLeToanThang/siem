@@ -185,35 +185,3 @@ END
 
 #Save the file then restart the MariaDB service to apply the changes.
 systemctl restart mariadb
-
-#Step 9. 
-#On Zabbix server host import initial schema and data. You will be prompted to enter your newly created password.
-
-zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix
-
-#Disable log_bin_trust_function_creators option after importing database schema.
-
-
-#Configure the database for Zabbix server
-#set database details with perl find and replace
-echo 'dbhost    = "'"$dbhost"'";' >>  /etc/zabbix/zabbix_server.conf
-echo 'dbname    = "'"$dbname"'";' >> /etc/zabbix/zabbix_server.conf
-echo 'dbuser    = "'"$dbuser"'";' >> /etc/zabbix/zabbix_server.conf
-echo 'dbpass    = "'"$dbpass"'";' >> /etc/zabbix/zabbix_server.conf
-
-
-#Configure PHP for Zabbix frontend
-Edit file /etc/zabbix/nginx.conf uncomment and set 'listen' and 'server_name' directives.
-
-listen 8080;
-server_name example.com;
-
-# Start Zabbix server and agent processes
-# Start Zabbix server and agent processes and make it start at system boot.
-
-systemctl restart zabbix-server zabbix-agent nginx php8.3-fpm
-systemctl enable zabbix-server zabbix-agent nginx php8.3-fpm
-
-#h. Open Zabbix UI web page
-#The URL for Zabbix UI when using Nginx depends on the configuration changes you should have made.
-
