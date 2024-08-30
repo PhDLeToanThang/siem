@@ -66,8 +66,8 @@ sudo apt-get -y install ssmtp mailutils
 # NO - Use the system generated From: address
 # Xoa trang va Thêm dòng
 cat > /etc/ssmtp/ssmtp.conf <<END
-
 END
+
 echo "root='"${emailgmail}"'"  >> /etc/ssmtp/ssmtp.conf
 echo "mailhub=smtp.gmail.com:587" >> /etc/ssmtp/ssmtp.conf
 echo "AuthUser='"${emailgmail}"'" >> /etc/ssmtp/ssmtp.conf
@@ -86,7 +86,7 @@ echo "FromLineOverride=YES"
 # Tạo alias cho user local. Mở file sau và sửa
 # Edit /etc/ssmtp/revaliases
 # Xoa trang va Thêm dòng
-cat > /etc/ssmtp/ssmtp.conf <<END
+cat > /etc/ssmtp/revaliases <<END
 
 END
 echo "root:${emailgmail}:smtp.gmail.com:587" >> /etc/ssmtp/revaliases
