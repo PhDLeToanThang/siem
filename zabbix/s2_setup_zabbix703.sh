@@ -281,7 +281,7 @@ systemctl restart php8.3-fpm.service
 
 #Step 14. Install Certbot
 sudo apt install certbot python3-certbot-nginx -y
-#sudo certbot --nginx -n -d $FQDN --email $emailcertbot --agree-tos --redirect --hsts
+sudo certbot --nginx -n -d $FQDN --email $emailcertbot --agree-tos --redirect --hsts
 
 # You should test your configuration at:
 # https://www.ssllabs.com/ssltest/analyze.html?d=$FQDN
