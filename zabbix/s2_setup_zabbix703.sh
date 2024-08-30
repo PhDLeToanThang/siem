@@ -209,3 +209,4 @@ systemctl enable zabbix-server zabbix-agent nginx php8.3-fpm
 #h. Open Zabbix UI web page
 #The URL for Zabbix UI when using Nginx depends on the configuration changes you should have made.
 
+fi

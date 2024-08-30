@@ -177,3 +177,4 @@ END
 
 #Save the file then restart the MariaDB service to apply the changes.
 systemctl restart mariadb
+fi
