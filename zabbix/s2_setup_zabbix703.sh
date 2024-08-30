@@ -23,8 +23,13 @@ echo "dbtype name: e.g: mariadb"   # Tên kiểu Database
 read -e dbtype
 echo "dbhost name: e.g: localhost"   # Tên Db host connector
 read -e dbhost
-echo "Your Email address fro Certbot e.g: thang@company.vn" # Địa chỉ email của bạn để quản lý CA
+echo "Your Email address for Certbot e.g: thang@company.vn" # Địa chỉ email của bạn để quản lý CA
 read -e emailcertbot
+echo "Your Email address for Gmail/pavn SMTP Replay Notification e.g: support_company gmail" 
+# Địa chỉ email email của bạn để quản lý thông báo từ Zabbix gửi đi, chỉ dùng cho gmail (Yahoo, MSO365 không cần)
+read -e emailgmail
+echo "Gmail Password: e.g: Password realtime of Gmail"
+read -s gmailpass
 
 GitZabbixversion="zabbix-release_7.0-2+ubuntu24.04_all.deb"
 
@@ -34,48 +39,40 @@ if [ "$run" == n ] ; then
   exit
 else
 
-# step 2. install nginx, libs, SSMTP
+# step 1. install nginx, libs, SSMTP
 sudo apt-get update -y
 sudo apt-get install nginx -y
 sudo systemctl stop nginx.service
 sudo systemctl start nginx.service
 sudo systemctl enable nginx.service
 
+# Step 2. Install ssmtp relay gmail and configure ssmtp email address for notification
 sudo apt-get -y install ssmtp mailutils 
 
-#File cấu hình SSMTP : 
-/etc/ssmtp/ssmtp.conf
-
-#
+# Edit ####################################
+#File cấu hình SSMTP : /etc/ssmtp/ssmtp.conf
 # Config file for sSMTP sendmail
-#
 # The person who gets all mail for userids < 1000
 # Make this empty to disable rewriting.
 # root=postmaster
-root=dangdohai1996@gmail.com
-
-# The place where the mail goes. The actual machine name is required no
-# MX records are consulted. Commonly mailhosts are named mail.domain.com
-# mailhub=mail
-mailhub=smtp.gmail.com:587
-
-AuthUser=youremail@gmail.com
-AuthPass=youremailpassword
-UseTLS=YES
-UseSTARTTLS=YES
-
+#The place where the mail goes. The actual machine name is required no
+#MX records are consulted. Commonly mailhosts are named mail.domain.com
+#mailhub=mail
 # Where will the mail seem to come from?
 #rewriteDomain=
-rewriteDomain=gmail.com
-
 # The full hostname
-hostname=ssmtpServer
-
 # Are users allowed to set their own From: address?
 # YES - Allow the user to specify their own From: address
 # NO - Use the system generated From: address
-FromLineOverride=YES
-
+echo "root='"${emailgmail}"'"  >> /etc/ssmtp/ssmtp.conf
+echo "mailhub=smtp.gmail.com:587" >> /etc/ssmtp/ssmtp.conf
+echo "AuthUser='"${emailgmail}"'" >> /etc/ssmtp/ssmtp.conf
+echo "AuthPass='"${gmailpass}"'" >> /etc/ssmtp/ssmtp.conf
+echo "UseTLS=YES" >> /etc/ssmtp/ssmtp.conf
+echo "UseSTARTTLS=YES" >> /etc/ssmtp/ssmtp.conf
+echo "rewriteDomain=gmail.com" >> /etc/ssmtp/ssmtp.conf
+echo "hostname=ssmtpServer"
+echo "FromLineOverride=YES"
 
 # Cho phép ứng dụng truy cập gmail, 
 #Nếu bạn sử dụng gmail làm địa chỉ người gửi thì bạn phải cho phép ứng dụng truy cập gmail của bạn
@@ -83,18 +80,12 @@ FromLineOverride=YES
 # https://myaccount.google.com/lesssecureapps
 # Bật chế độ cho phép ứng dụng truy cập
 # Tạo alias cho user local. Mở file sau và sửa
-
-nano /etc/ssmtp/revaliases
+# Edit /etc/ssmtp/revaliases
 #Thêm dòng
-
-root:youremail@gmail.com:smtp.gmail.com:587
-
-
+echo "root:'${emailgmail}':smtp.gmail.com:587" >> /etc/ssmtp/revaliases
 
 # Step 3. Install and configure Zabbix for your platform
-sudo -s
-
-wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/$GitZabbixversion
+sudo wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/$GitZabbixversion
 dpkg -i $GitZabbixversion
 sudo apt update -your
 
@@ -104,6 +95,7 @@ sudo apt -y install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf z
 
 # Step 5. Create initial database:
 #Run the following commands to install MariaDB database for Moode. You may also use MySQL instead.
+
 sudo apt-get install mariadb-server mariadb-client -y
 
 #we will run the following commands to enable MariaDB to autostart during reboot, and also start now.
@@ -196,10 +188,10 @@ zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-charact
 
 #Configure the database for Zabbix server
 #set database details with perl find and replace
-echo 'dbhost    = "'"$dbhost"'";' >>  /etc/zabbix/zabbix_server.conf
-echo 'dbname    = "'"$dbname"'";' >> /etc/zabbix/zabbix_server.conf
-echo 'dbuser    = "'"$dbuser"'";' >> /etc/zabbix/zabbix_server.conf
-echo 'dbpass    = "'"$dbpass"'";' >> /etc/zabbix/zabbix_server.conf
+echo 'dbhost    = "'"${dbhost}"'";' >>  /etc/zabbix/zabbix_server.conf
+echo 'dbname    = "'"${dbname}"'";' >> /etc/zabbix/zabbix_server.conf
+echo 'dbuser    = "'"${dbuser}"'";' >> /etc/zabbix/zabbix_server.conf
+echo 'dbpass    = "'"${dbpass}"'";' >> /etc/zabbix/zabbix_server.conf
 
 
 #Configure PHP for Zabbix frontend
