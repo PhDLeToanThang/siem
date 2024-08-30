@@ -96,7 +96,7 @@ dpkg -i $GitZabbixversion
 
 sudo apt update -y
 # Step 4. Install Zabbix server, frontend, agent
-sudo apt install zabbix-server-mysql zabbix-frontend-php zabbix-nginx-conf zabbix-sql-scripts zabbix-agent2 php-mysql php-gd php-bcmath php-net-socket -y
+sudo apt install zabbix-server-mysql zabbix-frontend-php zabbix-nginx-conf zabbix-sql-scripts zabbix-agent php8.3-bcmath php-net-socket -y
 
 # Step 5. Create initial database:
 #Run the following commands to install MariaDB database for Moode. You may also use MySQL instead.
