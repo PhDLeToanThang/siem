@@ -217,54 +217,30 @@ echo "127.0.0.1 ${FQDN}" >> /etc/hosts
 cat > /etc/nginx/conf.d/${FQDN}.conf <<END
 END
 
-echo 'server {' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	listen 80;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	server_name ${FQDN};' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	root /usr/share/zabbix;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	index index.php;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	location = /favicon.ico {log_not_found off;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	location / {' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '				try_files $uri $uri/ =404;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	location /assets{' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			access_log off;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			expires 10d;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	location ~ /.ht {' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			deny all;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	location ~ /(api/|conf[^.]|include|locale) {' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			deny all;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			return 404;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	location /vendor {' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			deny all;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			return 404;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	location ~ [^/].php(/|$) {' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_pass unix:/var/run/php/zabbix.sock;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_split_path_info ^(.+.php)(/.+)$;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_index index.php;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_param DOCUMENT_ROOT /usr/share/zabbix;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_param SCRIPT_FILENAME /usr/share/zabbix$fastcgi_script_name;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_param PATH_TRANSLATED /usr/share/zabbix$fastcgi_script_name;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			include fastcgi_params;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_param QUERY_STRING $query_string;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_param REQUEST_METHOD $request_method;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_param CONTENT_TYPE $content_type;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_param CONTENT_LENGTH $content_length;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_intercept_errors on;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_ignore_client_abort off;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_connect_timeout 60;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_send_timeout 180;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_read_timeout 180;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_buffer_size 128k;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_buffers 4 256k;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_busy_buffers_size 256k;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '			fastcgi_temp_file_write_size 256k;' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
-echo '}' >> /etc/nginx/conf.d/${FQDN}.conf
+echo 'server {'  >> /etc/nginx/conf.d/${FQDN}.conf
+echo '    listen 80;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '    server_name '$FQDN';'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    root /usr/share/zabbix;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    index  index.php;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    client_max_body_size 512M;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    autoindex off;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    location / {'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        try_files $uri $uri/ =404;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    location /dataroot/ {'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '      internal;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '      alias /var/www/html/'$FOLDERDATA'/;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    location ~ [^/].php(/|$) {'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        include snippets/fastcgi-php.conf;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        fastcgi_pass unix:/run/php/php8.3-fpm.sock;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        include fastcgi_params;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location ~ ^/(doc|sql|setup)/{'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '		deny all;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '}'>> /etc/nginx/conf.d/${FQDN}.conf
 
  
 #Save and close the file then verify the Nginx for any syntax error with the following command: 
