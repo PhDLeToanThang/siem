@@ -93,11 +93,10 @@ echo "root:${emailgmail}:smtp.gmail.com:587" >> /etc/ssmtp/revaliases
 # Step 3. Install and configure Zabbix for your platform
 sudo wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/$GitZabbixversion
 dpkg -i $GitZabbixversion
-sudo apt update -your
 
-
+sudo apt update -y
 # Step 4. Install Zabbix server, frontend, agent
-sudo apt -y install zabbix-server-mysql zabbix-frontend-php zabbix-nginx-conf zabbix-sql-scripts zabbix-agent2 php-mysql php-gd php-bcmath php-net-socket
+sudo apt install zabbix-server-mysql zabbix-frontend-php zabbix-nginx-conf zabbix-sql-scripts zabbix-agent2 php-mysql php-gd php-bcmath php-net-socket -y
 
 # Step 5. Create initial database:
 #Run the following commands to install MariaDB database for Moode. You may also use MySQL instead.
