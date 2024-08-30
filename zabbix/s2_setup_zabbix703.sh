@@ -68,10 +68,10 @@ sudo apt-get -y install ssmtp mailutils
 cat > /etc/ssmtp/ssmtp.conf <<END
 END
 
-echo "root='"${emailgmail}"'"  >> /etc/ssmtp/ssmtp.conf
+echo "root=${emailgmail}"  >> /etc/ssmtp/ssmtp.conf
 echo "mailhub=smtp.gmail.com:587" >> /etc/ssmtp/ssmtp.conf
-echo "AuthUser='"${emailgmail}"'" >> /etc/ssmtp/ssmtp.conf
-echo "AuthPass='"${gmailpass}"'" >> /etc/ssmtp/ssmtp.conf
+echo "AuthUser=${emailgmail}" >> /etc/ssmtp/ssmtp.conf
+echo "AuthPass=${gmailpass}" >> /etc/ssmtp/ssmtp.conf
 echo "UseTLS=YES" >> /etc/ssmtp/ssmtp.conf
 echo "UseSTARTTLS=YES" >> /etc/ssmtp/ssmtp.conf
 echo "rewriteDomain=gmail.com" >> /etc/ssmtp/ssmtp.conf
@@ -229,7 +229,7 @@ echo '        try_files $uri $uri/ =404;'>> /etc/nginx/conf.d/${FQDN}.conf
 echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
 echo '    location /dataroot/ {'>> /etc/nginx/conf.d/${FQDN}.conf
 echo '      internal;'>> /etc/nginx/conf.d/${FQDN}.conf
-echo '      alias /var/www/html/'$FOLDERDATA'/;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '      alias /var/www/html/;'>> /etc/nginx/conf.d/${FQDN}.conf
 echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
 echo '    location ~ [^/].php(/|$) {'>> /etc/nginx/conf.d/${FQDN}.conf
 echo '        include snippets/fastcgi-php.conf;'>> /etc/nginx/conf.d/${FQDN}.conf
@@ -242,7 +242,6 @@ echo '		deny all;'>> /etc/nginx/conf.d/${FQDN}.conf
 echo '	}'>> /etc/nginx/conf.d/${FQDN}.conf
 echo '}'>> /etc/nginx/conf.d/${FQDN}.conf
 
- 
 #Save and close the file then verify the Nginx for any syntax error with the following command: 
 nginx -t
 
