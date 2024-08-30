@@ -186,10 +186,8 @@ systemctl restart mariadb
 
 #Step 9. 
 #On Zabbix server host import initial schema and data. You will be prompted to enter your newly created password.
-
-zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix <<END
-${dbpass}
-END
+ # the password you set above for [zabbix] user
+zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix 
 
 #Disable log_bin_trust_function_creators option after importing database schema.
 #Configure the database for Zabbix server  /etc/zabbix/zabbix_server.conf
@@ -212,41 +210,62 @@ echo "LogSlowQueries=3000" >> /etc/zabbix/zabbix_server.conf
 echo "StatsAllowedIP=127.0.0.1" >> /etc/zabbix/zabbix_server.conf
 echo "EnableGlobalScripts=0" >> /etc/zabbix/zabbix_server.conf
 
-#Step 10. Configure PHP for Zabbix frontend
-#/etc/zabbix/zabbix_agent2.conf
-# line 80 : specify Zabbix server
-#Server=127.0.0.1
-# line 133 : specify Zabbix server
-#ServerActive=127.0.0.1
-# line 144 : change to your hostname
-#Hostname=dlp.srv.world
+#Step 10. Configure PHP for Zabbix frontend /etc/hosts
+# line 1 : specify Zabbix server
+echo "127.0.0.1 ${FQDN}" >> /etc/hosts
 
-#cat > /etc/zabbix/nginx.conf <<END
-#END
-#echo 'server {'  >> /etc/zabbix/nginx.conf
-#echo '    listen 80;' >> /etc/zabbix/nginx.conf
-#echo '    root /var/www/html/'$FQDN';'>> /etc/zabbix/nginx.conf
-#echo '    index  index.php index.html index.htm;'>> /etc/zabbix/nginx.conf
-#echo '    server_name '$FQDN';'>> /etc/zabbix/nginx.conf
-#echo '    client_max_body_size 512M;'>> /etc/zabbix/nginx.conf
-#echo '    autoindex off;'>> /etc/zabbix/nginx.conf
-#echo '    location / {'>> /etc/zabbix/nginx.conf
-#echo '        try_files $uri $uri/ =404;'>> /etc/zabbix/nginx.conf
-#echo '    }'>> /etc/zabbix/nginx.conf
-#echo '    location /dataroot/ {'>> /etc/zabbix/nginx.conf
-#echo '      internal;'>> /etc/zabbix/nginx.conf
-#echo '      alias /var/www/html/'$FOLDERDATA'/;'>> /etc/zabbix/nginx.conf
-#echo '    }'>> /etc/zabbix/nginx.conf
-#echo '    location ~ [^/].php(/|$) {'>> /etc/zabbix/nginx.conf
-#echo '        include snippets/fastcgi-php.conf;'>> /etc/zabbix/nginx.conf
-#echo '        fastcgi_pass unix:/run/php/php8.3-fpm.sock;'>> /etc/zabbix/nginx.conf
-#echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;'>> /etc/zabbix/nginx.conf
-#echo '        include fastcgi_params;'>> /etc/zabbix/nginx.conf
-#echo '    }'>> /etc/zabbix/nginx.conf
-#echo '	location ~ ^/(doc|sql|setup)/{'>> /etc/zabbix/nginx.conf
-#echo '		deny all;'>> /etc/zabbix/nginx.conf
-#echo '	}'>> /etc/zabbix/nginx.conf
-#echo '}'>> /etc/zabbix/nginx.conf
+cat > /etc/nginx/conf.d/${FQDN}.conf <<END
+END
+
+echo 'server {' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	listen 80;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	server_name ${FQDN};' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	root /usr/share/zabbix;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	index index.php;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location = /favicon.ico {log_not_found off;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location / {' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '				try_files $uri $uri/ =404;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location /assets{' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			access_log off;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			expires 10d;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location ~ /.ht {' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			deny all;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location ~ /(api/|conf[^.]|include|locale) {' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			deny all;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			return 404;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location /vendor {' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			deny all;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			return 404;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location ~ [^/].php(/|$) {' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_pass unix:/var/run/php/zabbix.sock;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_split_path_info ^(.+.php)(/.+)$;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_index index.php;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_param DOCUMENT_ROOT /usr/share/zabbix;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_param SCRIPT_FILENAME /usr/share/zabbix$fastcgi_script_name;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_param PATH_TRANSLATED /usr/share/zabbix$fastcgi_script_name;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			include fastcgi_params;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_param QUERY_STRING $query_string;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_param REQUEST_METHOD $request_method;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_param CONTENT_TYPE $content_type;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_param CONTENT_LENGTH $content_length;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_intercept_errors on;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_ignore_client_abort off;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_connect_timeout 60;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_send_timeout 180;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_read_timeout 180;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_buffer_size 128k;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_buffers 4 256k;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_busy_buffers_size 256k;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '			fastcgi_temp_file_write_size 256k;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '}' >> /etc/nginx/conf.d/${FQDN}.conf
+
  
 #Save and close the file then verify the Nginx for any syntax error with the following command: 
 nginx -t
@@ -265,7 +284,7 @@ whereis apache2
 apache2: /etc/apache2
 sudo rm -rf /etc/apache2
 
-sudo ln -s /usr/share/phpmyadmin /var/www/html/$FQDN/$phpmyadmin
+sudo ln -s /usr/share/phpmyadmin /var/www/html/${FQDN}/${phpmyadmin}
 sudo chown -R root:root /var/lib/phpmyadmin
 sudo nginx -t
 
