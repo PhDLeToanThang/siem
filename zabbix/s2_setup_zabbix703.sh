@@ -213,6 +213,14 @@ echo "StatsAllowedIP=127.0.0.1" >> /etc/zabbix/zabbix_server.conf
 echo "EnableGlobalScripts=0" >> /etc/zabbix/zabbix_server.conf
 
 #Step 10. Configure PHP for Zabbix frontend
+#/etc/zabbix/zabbix_agent2.conf
+# line 80 : specify Zabbix server
+#Server=127.0.0.1
+# line 133 : specify Zabbix server
+#ServerActive=127.0.0.1
+# line 144 : change to your hostname
+#Hostname=dlp.srv.world
+
 #cat > /etc/zabbix/nginx.conf <<END
 #END
 #echo 'server {'  >> /etc/zabbix/nginx.conf
@@ -280,7 +288,7 @@ systemctl restart php8.3-fpm.service
 
 #Step 14. Install Certbot
 sudo apt install certbot python3-certbot-nginx -y
-sudo certbot --nginx -n -d $FQDN --email $emailcertbot --agree-tos --redirect --hsts
+#sudo certbot --nginx -n -d $FQDN --email $emailcertbot --agree-tos --redirect --hsts
 
 # You should test your configuration at:
 # https://www.ssllabs.com/ssltest/analyze.html?d=$FQDN
