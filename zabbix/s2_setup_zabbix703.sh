@@ -9,19 +9,19 @@
 ############### Tham số cần thay đổi ở đây ###################
 echo "FQDN: e.g: demo.company.vn"   # Đổi địa chỉ web thứ nhất Website Master for Resource code - để tạo cùng 1 Source code duy nhất 
 read -e FQDN
-echo "dbname: e.g: zabbix"   # Tên DBNane
+echo "DBName: e.g: zabbix"   # Tên DBNane
 read -e dbname
-echo "dbuser: e.g: userdata"   # Tên User access DB lmsatcuser
+echo "DBUser: e.g: zabbix"   # Tên DBUser access DB
 read -e dbuser
-echo "Database Password: e.g: P@$$w0rd-1.22"
+echo "DBPassword Password: e.g: P@$$w0rd-1.22"
 read -s dbpass
 echo "phpmyadmin folder name: e.g: phpmyadmin"   # Đổi tên thư mục phpmyadmin khi add link symbol vào Website 
 read -e phpmyadmin
-echo "Moodle Folder Data: e.g: moodledata"   # Tên Thư mục chưa Data vs Cache
+echo "Zabbix Folder Data: e.g: zabbixdata"   # Tên Thư mục chưa Data vs Cache
 read -e FOLDERDATA
-echo "dbtype name: e.g: mariadb"   # Tên kiểu Database
+echo "DBType name: e.g: mariadb"   # Tên kiểu Database
 read -e dbtype
-echo "dbhost name: e.g: localhost"   # Tên Db host connector
+echo "DBHost name: e.g: localhost"   # Tên Db host connector
 read -e dbhost
 echo "Your Email address for Certbot e.g: thang@company.vn" # Địa chỉ email của bạn để quản lý CA
 read -e emailcertbot
@@ -66,8 +66,8 @@ sudo apt-get -y install ssmtp mailutils
 # NO - Use the system generated From: address
 # Xoa trang va Thêm dòng
 cat > /etc/ssmtp/ssmtp.conf <<END
-
 END
+
 echo "root='"${emailgmail}"'"  >> /etc/ssmtp/ssmtp.conf
 echo "mailhub=smtp.gmail.com:587" >> /etc/ssmtp/ssmtp.conf
 echo "AuthUser='"${emailgmail}"'" >> /etc/ssmtp/ssmtp.conf
@@ -86,8 +86,7 @@ echo "FromLineOverride=YES"
 # Tạo alias cho user local. Mở file sau và sửa
 # Edit /etc/ssmtp/revaliases
 # Xoa trang va Thêm dòng
-cat > /etc/ssmtp/ssmtp.conf <<END
-
+cat > /etc/ssmtp/revaliases <<END
 END
 echo "root:${emailgmail}:smtp.gmail.com:587" >> /etc/ssmtp/revaliases
 
@@ -184,7 +183,6 @@ END
 
 #Save the file then restart the MariaDB service to apply the changes.
 systemctl restart mariadb
-fi
 
 #Step 9. 
 #On Zabbix server host import initial schema and data. You will be prompted to enter your newly created password.
@@ -192,21 +190,105 @@ fi
 zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix
 
 #Disable log_bin_trust_function_creators option after importing database schema.
-
-
-#Configure the database for Zabbix server
+#Configure the database for Zabbix server  /etc/zabbix/zabbix_server.conf
 #set database details with perl find and replace
-echo 'dbhost    = "'"${dbhost}"'";' >>  /etc/zabbix/zabbix_server.conf
-echo 'dbname    = "'"${dbname}"'";' >> /etc/zabbix/zabbix_server.conf
-echo 'dbuser    = "'"${dbuser}"'";' >> /etc/zabbix/zabbix_server.conf
-echo 'dbpass    = "'"${dbpass}"'";' >> /etc/zabbix/zabbix_server.conf
+cat > /etc/zabbix/zabbix_server.conf <<END
+END
+echo "DBName=${dbname}" >> /etc/zabbix/zabbix_server.conf
+echo "DBUser=${dbuser}" >> /etc/zabbix/zabbix_server.conf
+echo "DBHost=${dbhost}" >>  /etc/zabbix/zabbix_server.conf
+echo "DBPassword=${dbpass}" >> /etc/zabbix/zabbix_server.conf
+echo "LogFile=/var/log/zabbix/zabbix_server.log" >> /etc/zabbix/zabbix_server.conf
+echo "LogFileSize=0" >> /etc/zabbix/zabbix_server.conf
+echo "PidFile=/run/zabbix/zabbix_serer.pid" >> /etc/zabbix/zabbix_server.conf
+echo "SocketDir=/run/zabbix" >> /etc/zabbix/zabbix_server.conf
+echo "SNMPTrapperFile=/var/log/snmptrap/snmptrap.log" >> /etc/zabbix/zabbix_server.conf
+echo "Timeout=4" >> /etc/zabbix/zabbix_server.conf
+echo "FpingLocation=/usr/bin/fping" >> /etc/zabbix/zabbix_server.conf
+echo "Fping6Location=/usr/bin/fping6" >> /etc/zabbix/zabbix_server.conf
+echo "LogSlowQueries=3000" >> /etc/zabbix/zabbix_server.conf
+echo "StatsAllowedIP=127.0.0.1" >> /etc/zabbix/zabbix_server.conf
+echo "EnableGlobalScripts=0" >> /etc/zabbix/zabbix_server.conf
 
+#Step 10. Configure PHP for Zabbix frontend
+cat > /etc/zabbix/nginx.conf <<END
+END
+echo 'server {'  >> /etc/zabbix/nginx.conf
+echo '    listen 80;' >> /etc/zabbix/nginx.conf
+echo '    root /var/www/html/'$FQDN';'>> /etc/zabbix/nginx.conf
+echo '    index  index.php index.html index.htm;'>> /etc/zabbix/nginx.conf
+echo '    server_name '$FQDN';'>> /etc/zabbix/nginx.conf
+echo '    client_max_body_size 512M;'>> /etc/zabbix/nginx.conf
+echo '    autoindex off;'>> /etc/zabbix/nginx.conf
+echo '    location / {'>> /etc/zabbix/nginx.conf
+echo '        try_files $uri $uri/ =404;'>> /etc/zabbix/nginx.conf
+echo '    }'>> /etc/zabbix/nginx.conf
+echo '    location /dataroot/ {'>> /etc/zabbix/nginx.conf
+echo '      internal;'>> /etc/zabbix/nginx.conf
+echo '      alias /var/www/html/'$FOLDERDATA'/;'>> /etc/zabbix/nginx.conf
+echo '    }'>> /etc/zabbix/nginx.conf
+echo '    location ~ [^/].php(/|$) {'>> /etc/zabbix/nginx.conf
+echo '        include snippets/fastcgi-php.conf;'>> /etc/zabbix/nginx.conf
+echo '        fastcgi_pass unix:/run/php/php8.3-fpm.sock;'>> /etc/zabbix/nginx.conf
+echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;'>> /etc/zabbix/nginx.conf
+echo '        include fastcgi_params;'>> /etc/zabbix/nginx.conf
+echo '    }'>> /etc/zabbix/nginx.conf
+echo '	location ~ ^/(doc|sql|setup)/{'>> /etc/zabbix/nginx.conf
+echo '		deny all;'>> /etc/zabbix/nginx.conf
+echo '	}'>> /etc/zabbix/nginx.conf
+echo '}'>> /etc/zabbix/nginx.conf
 
-#Configure PHP for Zabbix frontend
-Edit file /etc/zabbix/nginx.conf uncomment and set 'listen' and 'server_name' directives.
+#Save and close the file then verify the Nginx for any syntax error with the following command: 
+nginx -t
 
-listen 8080;
-server_name example.com;
+#Step 11. Setup and Configure PhpMyAdmin
+sudo apt update -y
+sudo apt install phpmyadmin -y
+
+#Step 12. gỡ bỏ apache:
+sudo service apache2 stop
+sudo apt-get purge apache2 apache2-utils apache2.2-bin apache2-common
+sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common
+
+sudo apt-get autoremove
+whereis apache2
+apache2: /etc/apache2
+sudo rm -rf /etc/apache2
+
+sudo ln -s /usr/share/phpmyadmin /var/www/html/$FQDN/$phpmyadmin
+sudo chown -R root:root /var/lib/phpmyadmin
+sudo nginx -t
+
+#Step 13. Nâng cấp PhpmyAdmin lên version 5.2.1:
+sudo mv /usr/share/phpmyadmin/ /usr/share/phpmyadmin.bak
+sudo mkdir /usr/share/phpmyadmin/
+cd /usr/share/phpmyadmin/
+sudo wget https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.tar.gz
+sudo tar xzf phpMyAdmin-5.2.1-all-languages.tar.gz
+#Once extracted, list folder.
+ls
+#You should see a new folder phpMyAdmin-5.2.1-all-languages
+#We want to move the contents of this folder to /usr/share/phpmyadmin
+sudo mv phpMyAdmin-5.2.1-all-languages/* /usr/share/phpmyadmin
+ls /usr/share/phpmyadmin
+mkdir /usr/share/phpMyAdmin/tmp   # tạo thư mục cache cho phpmyadmin
+
+sudo systemctl restart nginx
+systemctl restart php8.3-fpm.service
+
+#Step 14. Install Certbot
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -n -d $FQDN --email $emailcertbot --agree-tos --redirect --hsts
+
+# You should test your configuration at:
+# https://www.ssllabs.com/ssltest/analyze.html?d=$FQDN
+#/etc/letsencrypt/live/$FQDN/fullchain.pem
+#   Your key file has been saved at:
+#   /etc/letsencrypt/live/$FQDN/privkey.pem
+#   Your cert will expire on yyyy-mm-dd. To obtain a new or tweaked
+#   version of this certificate in the future, simply run certbot again
+#   with the certonly option. To non-interactively renew *all* of
+#   your certificates, run certbot renew
 
 # Start Zabbix server and agent processes
 # Start Zabbix server and agent processes and make it start at system boot.
