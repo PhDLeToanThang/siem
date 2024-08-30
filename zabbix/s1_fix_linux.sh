@@ -37,6 +37,7 @@ sudo apt install wget -y
 sudo apt install ufw -y
 sudo apt install net-tools -y
 sudo apt install gparted -y
+sudo apt install gedit -y
 sudo apt install ifupdown -y
 
 # After you already have Cockpit on your server, point your web browser to: https://ip-address-of-machine:9090
