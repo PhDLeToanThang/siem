@@ -1,9 +1,9 @@
 # Ref: https://www.zabbix.com/download?zabbix=7.0&os_distribution=ubuntu&os_version=24.04&components=server_frontend_agent&db=mysql&ws=apache
-#	Zabbix 7.0.3 LTS / Ubuntu 24.04 LTS 
+#	Zabbix 7.0.3 LTS / Ubuntu 24.04.1 LTS 
 #	Deploy Server, FrontEnd , Agent Funcations
-#	MySQL, MariaDB, PHPmyAdmin
-#   NGINX
-#	SSMTP
+#	MySQL 5.6, MariaDB 10., PHPmyAdmin  5.2.1
+#   NGINX 1.2.4
+#	SSMTP 1.2.1
 ###########################################
 # Step 1. var
 ############### Tham số cần thay đổi ở đây ###################
@@ -64,6 +64,10 @@ sudo apt-get -y install ssmtp mailutils
 # Are users allowed to set their own From: address?
 # YES - Allow the user to specify their own From: address
 # NO - Use the system generated From: address
+# Xoa trang va Thêm dòng
+cat > /etc/ssmtp/ssmtp.conf <<END
+
+END
 echo "root='"${emailgmail}"'"  >> /etc/ssmtp/ssmtp.conf
 echo "mailhub=smtp.gmail.com:587" >> /etc/ssmtp/ssmtp.conf
 echo "AuthUser='"${emailgmail}"'" >> /etc/ssmtp/ssmtp.conf
@@ -81,8 +85,11 @@ echo "FromLineOverride=YES"
 # Bật chế độ cho phép ứng dụng truy cập
 # Tạo alias cho user local. Mở file sau và sửa
 # Edit /etc/ssmtp/revaliases
-#Thêm dòng
-echo "root:'${emailgmail}':smtp.gmail.com:587" >> /etc/ssmtp/revaliases
+# Xoa trang va Thêm dòng
+cat > /etc/ssmtp/ssmtp.conf <<END
+
+END
+echo "root:${emailgmail}:smtp.gmail.com:587" >> /etc/ssmtp/revaliases
 
 # Step 3. Install and configure Zabbix for your platform
 sudo wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/$GitZabbixversion
@@ -177,6 +184,7 @@ END
 
 #Save the file then restart the MariaDB service to apply the changes.
 systemctl restart mariadb
+fi
 
 #Step 9. 
 #On Zabbix server host import initial schema and data. You will be prompted to enter your newly created password.

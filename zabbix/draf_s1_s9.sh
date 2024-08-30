@@ -64,6 +64,10 @@ sudo apt-get -y install ssmtp mailutils
 # Are users allowed to set their own From: address?
 # YES - Allow the user to specify their own From: address
 # NO - Use the system generated From: address
+# Xoa trang va Thêm dòng
+cat > /etc/ssmtp/ssmtp.conf <<END
+
+END
 echo "root='"${emailgmail}"'"  >> /etc/ssmtp/ssmtp.conf
 echo "mailhub=smtp.gmail.com:587" >> /etc/ssmtp/ssmtp.conf
 echo "AuthUser='"${emailgmail}"'" >> /etc/ssmtp/ssmtp.conf
@@ -81,8 +85,11 @@ echo "FromLineOverride=YES"
 # Bật chế độ cho phép ứng dụng truy cập
 # Tạo alias cho user local. Mở file sau và sửa
 # Edit /etc/ssmtp/revaliases
-#Thêm dòng
-echo "root:'${emailgmail}':smtp.gmail.com:587" >> /etc/ssmtp/revaliases
+# Xoa trang va Thêm dòng
+cat > /etc/ssmtp/ssmtp.conf <<END
+
+END
+echo "root:${emailgmail}:smtp.gmail.com:587" >> /etc/ssmtp/revaliases
 
 # Step 3. Install and configure Zabbix for your platform
 sudo wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/$GitZabbixversion
