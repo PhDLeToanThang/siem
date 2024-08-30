@@ -97,7 +97,7 @@ sudo apt update -your
 
 
 # Step 4. Install Zabbix server, frontend, agent
-sudo apt -y install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent2 php-mysql php-gd php-bcmath php-net-socket
+sudo apt -y install zabbix-server-mysql zabbix-frontend-php zabbix-nginx-conf zabbix-sql-scripts zabbix-agent2 php-mysql php-gd php-bcmath php-net-socket
 
 # Step 5. Create initial database:
 #Run the following commands to install MariaDB database for Moode. You may also use MySQL instead.
@@ -187,7 +187,9 @@ systemctl restart mariadb
 #Step 9. 
 #On Zabbix server host import initial schema and data. You will be prompted to enter your newly created password.
 
-zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix
+zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix <<END
+${dbpass}
+END
 
 #Disable log_bin_trust_function_creators option after importing database schema.
 #Configure the database for Zabbix server  /etc/zabbix/zabbix_server.conf
@@ -211,33 +213,33 @@ echo "StatsAllowedIP=127.0.0.1" >> /etc/zabbix/zabbix_server.conf
 echo "EnableGlobalScripts=0" >> /etc/zabbix/zabbix_server.conf
 
 #Step 10. Configure PHP for Zabbix frontend
-cat > /etc/zabbix/nginx.conf <<END
-END
-echo 'server {'  >> /etc/zabbix/nginx.conf
-echo '    listen 80;' >> /etc/zabbix/nginx.conf
-echo '    root /var/www/html/'$FQDN';'>> /etc/zabbix/nginx.conf
-echo '    index  index.php index.html index.htm;'>> /etc/zabbix/nginx.conf
-echo '    server_name '$FQDN';'>> /etc/zabbix/nginx.conf
-echo '    client_max_body_size 512M;'>> /etc/zabbix/nginx.conf
-echo '    autoindex off;'>> /etc/zabbix/nginx.conf
-echo '    location / {'>> /etc/zabbix/nginx.conf
-echo '        try_files $uri $uri/ =404;'>> /etc/zabbix/nginx.conf
-echo '    }'>> /etc/zabbix/nginx.conf
-echo '    location /dataroot/ {'>> /etc/zabbix/nginx.conf
-echo '      internal;'>> /etc/zabbix/nginx.conf
-echo '      alias /var/www/html/'$FOLDERDATA'/;'>> /etc/zabbix/nginx.conf
-echo '    }'>> /etc/zabbix/nginx.conf
-echo '    location ~ [^/].php(/|$) {'>> /etc/zabbix/nginx.conf
-echo '        include snippets/fastcgi-php.conf;'>> /etc/zabbix/nginx.conf
-echo '        fastcgi_pass unix:/run/php/php8.3-fpm.sock;'>> /etc/zabbix/nginx.conf
-echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;'>> /etc/zabbix/nginx.conf
-echo '        include fastcgi_params;'>> /etc/zabbix/nginx.conf
-echo '    }'>> /etc/zabbix/nginx.conf
-echo '	location ~ ^/(doc|sql|setup)/{'>> /etc/zabbix/nginx.conf
-echo '		deny all;'>> /etc/zabbix/nginx.conf
-echo '	}'>> /etc/zabbix/nginx.conf
-echo '}'>> /etc/zabbix/nginx.conf
-
+#cat > /etc/zabbix/nginx.conf <<END
+#END
+#echo 'server {'  >> /etc/zabbix/nginx.conf
+#echo '    listen 80;' >> /etc/zabbix/nginx.conf
+#echo '    root /var/www/html/'$FQDN';'>> /etc/zabbix/nginx.conf
+#echo '    index  index.php index.html index.htm;'>> /etc/zabbix/nginx.conf
+#echo '    server_name '$FQDN';'>> /etc/zabbix/nginx.conf
+#echo '    client_max_body_size 512M;'>> /etc/zabbix/nginx.conf
+#echo '    autoindex off;'>> /etc/zabbix/nginx.conf
+#echo '    location / {'>> /etc/zabbix/nginx.conf
+#echo '        try_files $uri $uri/ =404;'>> /etc/zabbix/nginx.conf
+#echo '    }'>> /etc/zabbix/nginx.conf
+#echo '    location /dataroot/ {'>> /etc/zabbix/nginx.conf
+#echo '      internal;'>> /etc/zabbix/nginx.conf
+#echo '      alias /var/www/html/'$FOLDERDATA'/;'>> /etc/zabbix/nginx.conf
+#echo '    }'>> /etc/zabbix/nginx.conf
+#echo '    location ~ [^/].php(/|$) {'>> /etc/zabbix/nginx.conf
+#echo '        include snippets/fastcgi-php.conf;'>> /etc/zabbix/nginx.conf
+#echo '        fastcgi_pass unix:/run/php/php8.3-fpm.sock;'>> /etc/zabbix/nginx.conf
+#echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;'>> /etc/zabbix/nginx.conf
+#echo '        include fastcgi_params;'>> /etc/zabbix/nginx.conf
+#echo '    }'>> /etc/zabbix/nginx.conf
+#echo '	location ~ ^/(doc|sql|setup)/{'>> /etc/zabbix/nginx.conf
+#echo '		deny all;'>> /etc/zabbix/nginx.conf
+#echo '	}'>> /etc/zabbix/nginx.conf
+#echo '}'>> /etc/zabbix/nginx.conf
+ 
 #Save and close the file then verify the Nginx for any syntax error with the following command: 
 nginx -t
 
