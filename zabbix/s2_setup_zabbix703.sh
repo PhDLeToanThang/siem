@@ -163,7 +163,7 @@ systemctl restart php8.3-fpm.service
 sudo snap install mysql-workbench-community
 
 mysql -uroot -prootpassword -e "DROP DATABASE IF EXISTS ${dbname};"
-mysql -uroot -prootpassword -e "CREATE DATABASE IF NOT EXISTS ${dbname} CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
+mysql -uroot -prootpassword -e "CREATE DATABASE IF NOT EXISTS ${dbname} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -uroot -prootpassword -e "CREATE USER IF NOT EXISTS '${dbuser}'@'${dbhost}' IDENTIFIED BY \"${dbpass}\";"
 mysql -uroot -prootpassword -e "GRANT ALL PRIVILEGES ON ${dbname}.* TO '${dbuser}'@'${dbhost}';"
 mysql -uroot -prootpassword -e "set global log_bin_trust_function_creators = 1;"
