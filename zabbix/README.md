@@ -50,4 +50,7 @@ Sau khi cấu hình, chúng ta test:
 **Gmail:**
 - Không thành công do ArchLinux 8.10 không cho cài ssmtp,
 - Gmail phải bật chế độ Less Security trong khi Account email lại bật MFA/2FA là không khả thi.
+- Lớp HĐH AlmaLinux 8.10 được đóng gói ở Zabbix 6.x/7.x Appliance đã giới hạn các lớp thư viện cài bổ sung (https://almalinux.org/blog/2024-05-28-announcing-810-stable/)
+  ví dụ: ssmtp, msmtp, postfix thuộc nhóm MAPI API Client/ SMTP server mailrelay.
+- Ngoài ra, Gmail cấu hình Security thay đổi không cho bật các chế độ Bảo mật thấp khi đã có bật và cấu hình MFA/2FA cho nhiều thiết bị truy cập.
   
