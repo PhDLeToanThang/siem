@@ -54,3 +54,34 @@ Sau khi cấu hình, chúng ta test:
   ví dụ: ssmtp, msmtp, postfix thuộc nhóm MAPI API Client/ SMTP server mailrelay.
 - Ngoài ra, Gmail cấu hình Security thay đổi không cho bật các chế độ Bảo mật thấp khi đã có bật và cấu hình MFA/2FA cho nhiều thiết bị truy cập.
   
+Tham khảo hướng dẫn issue cách sửa cấu hình tài khoản trong GMAIL để có thể sử dụng Zabbix gửi qua gmail: 
+https://github.com/PhDLeToanThang/siem/issues/3#issuecomment-2323153820
+
+---
+
+## Cách 2. Dựng mới Zabbix 7.x trên VM Ubuntu 24.04 LTS server:
+
+#Ref: https://www.zabbix.com/download?zabbix=7.0&os_distribution=ubuntu&os_version=24.04&components=server_frontend_agent&db=mysql&ws=apache
+
+#Zabbix 7.0.3 LTS / Ubuntu 24.04.1 LTS 
+
+#Deploy Server, FrontEnd , Agent Funcations
+
+#MySQL 5.6, MariaDB 10., PHPmyAdmin  5.2.1
+
+#NGINX 1.2.4
+
+#SSMTP 1.2.1
+
+- Sau khi tạo VM và cài OS Ubuntu 24.04 LTS hoàn thành:
+- Kết nối mạng và download 2 files source sh bằng lệnh trên terminal:
+```sh
+sudo wget https://raw.githubusercontent.com/PhDLeToanThang/siem/main/zabbix/s1_fix_linux.sh
+sudo bash s1_fix_linux.sh
+```
+
+- Sau khi reboot và truy cập trở lại màn terminal:
+```sh
+sudo wget https://raw.githubusercontent.com/PhDLeToanThang/siem/main/zabbix/s2_setup_zabbix703.sh
+sudo bash s2_setup_zabbix703.sh
+```
