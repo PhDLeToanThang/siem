@@ -188,6 +188,8 @@ systemctl restart mariadb
 #On Zabbix server host import initial schema and data. You will be prompted to enter your newly created password.
  # the password you set above for [zabbix] user
 zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -uzabbix -p zabbix 
+mysql -uroot -prootpassword -e "set global log_bin_trust_function_creators = 0;"
+mysql -uroot -prootpassword -e "quit"
 
 #Disable log_bin_trust_function_creators option after importing database schema.
 #Configure the database for Zabbix server  /etc/zabbix/zabbix_server.conf
@@ -216,93 +218,31 @@ echo "127.0.0.1 ${FQDN}" >> /etc/hosts
 
 cat > /etc/nginx/conf.d/${FQDN}.conf <<END
 END
-echo 'server {' >> /etc/nginx/conf.d/$FQDN.conf
-echo '	listen [::]:80;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  listen 80;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  server_name '${FQDN}';'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location / {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  return 301 https://$host$request_uri;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '}'  >> /etc/nginx/conf.d/$FQDN.conf
-echo 'server {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  listen [::]:443 ssl http2;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  listen 443 ssl http2;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  server_name '${FQDN}';'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  access_log /var/log/nginx/${FQDN}.access.log;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  error_log /var/log/nginx/${FQDN}.error.log;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '	ssl_certificate /etc/letsencrypt/live/${FQDN}/fullchain.pem;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  ssl_certificate_key /etc/letsencrypt/live/${FQDN}/privkey.pem;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  include /etc/letsencrypt/options-ssl-nginx.conf;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  add_header Strict-Transport-Security "max-age=31536000" always;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo ' 	add_header Referrer-Policy origin always;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  add_header X-Content-Type-Options "nosniff" always;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  add_header X-XSS-Protection "1; mode=block" always;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  root /var/www/html/${FQDN};'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  index index.php;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  ocation ~ ^/(index|matomo|piwik|js/index|plugins/HeatmapSessionRecording/configs)\.php$ {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  include snippets/fastcgi-php.conf;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  fastcgi_param HTTP_PROXY "";'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location ~* ^.+\.php$ {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  deny all;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  return 403;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location / {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  try_files $uri $uri/ =404;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location ~ ^/(config|tmp|core|lang) {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  deny all;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  return 403;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location ~ /\.ht {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  deny  all;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  return 403;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location ~ js/container_.*_preview\.js$ {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  expires off;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  add_header Cache-Control 'private, no-cache, no-store';'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location ~ \.(gif|ico|jpg|png|svg|js|css|htm|html|mp3|mp4|wav|ogg|avi|ttf|eot|woff|woff2)$ {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  allow all;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  expires 1h;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  add_header Pragma public;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  add_header Cache-Control "public";'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location ~ ^/(libs|vendor|plugins|misc|node_modules) {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  deny all;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  return 403;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  location ~/(.*\.md|LEGALNOTICE|LICENSE) {'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  default_type text/plain;'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '  }'  >> /etc/nginx/conf.d/$FQDN.conf
-echo '}'  >> /etc/nginx/conf.d/$FQDN.conf
 
-#echo 'server {'  >> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    listen 80;' >> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    server_name '$FQDN';'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    root /usr/share/zabbix;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    index  index.php;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    client_max_body_size 512M;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    autoindex off;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    location / {'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '        try_files $uri $uri/ =404;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    location /dataroot/ {'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '      internal;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '      alias /var/www/html/;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    location ~ [^/].php(/|$) {'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '        include snippets/fastcgi-php.conf;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '        fastcgi_pass unix:/run/php/php8.3-fpm.sock;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '        include fastcgi_params;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '	location ~ ^/(doc|sql|setup)/{'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '		deny all;'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '	}'>> /etc/nginx/conf.d/${FQDN}.conf
-#echo '}'>> /etc/nginx/conf.d/${FQDN}.conf
+echo 'server {'  >> /etc/nginx/conf.d/${FQDN}.conf
+echo '    listen 80;' >> /etc/nginx/conf.d/${FQDN}.conf
+echo '    server_name '$FQDN';'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    root /usr/share/zabbix;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    index  index.php;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    client_max_body_size 512M;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    autoindex off;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    location / {'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        try_files $uri $uri/ =404;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    location /dataroot/ {'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '      internal;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '      alias /var/www/html/;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    location ~ [^/].php(/|$) {'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        include snippets/fastcgi-php.conf;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        fastcgi_pass unix:/run/php/php8.3-fpm.sock;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '        include fastcgi_params;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '    }'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '	location ~ ^/(doc|sql|setup)/{'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '		deny all;'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '	}'>> /etc/nginx/conf.d/${FQDN}.conf
+echo '}'>> /etc/nginx/conf.d/${FQDN}.conf
 
 #Save and close the file then verify the Nginx for any syntax error with the following command: 
 nginx -t
