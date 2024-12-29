@@ -6,6 +6,8 @@ Giải pháp SIEM tổng hợp dữ liệu từ nhiều nguồn và sử dụng 
 
 Để giúp bạn khám phá thế giới SIEM, tôi đã tổng hợp một danh sách các tài nguyên học tập có giá trị.
 
+![image](https://github.com/user-attachments/assets/4b277d06-9144-4d5c-a4e5-7863179fa86a)
+
 ✅Chung
 📎Cơ bản về ghi nhật ký Windows - https://lnkd.in/grKYFQzJ
 📎Jose Bravo - SIEM là gì? (5 Video): https://lnkd.in/gc2UDpeD
