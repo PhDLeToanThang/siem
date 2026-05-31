@@ -1,0 +1,62 @@
+#===============================================================================
+# Kibana Configuration - SIEM 9.4.2
+# Path: /etc/kibana/kibana.yml
+#===============================================================================
+
+# ----- Server -----
+server.port: 5601
+server.host: "0.0.0.0"
+server.publicBaseUrl: "https://siem.example.com"
+server.name: "SIEM-Kibana-9.4.2"
+
+# ----- SSL/TLS -----
+server.ssl.enabled: true
+server.ssl.certificate: /etc/kibana/certs/fullchain.pem
+server.ssl.key: /etc/kibana/certs/privkey.pem
+
+# ----- Elasticsearch -----
+elasticsearch.hosts: ["https://localhost:9200"]
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "${KIBANA_PASSWORD}"
+elasticsearch.ssl.certificateAuthorities: ["/etc/kibana/certs/fullchain.pem"]
+elasticsearch.ssl.verificationMode: certificate
+elasticsearch.requestTimeout: 60000
+elasticsearch.pingTimeout: 30000
+
+# ----- Encryption Keys -----
+xpack.encryptedSavedObjects.encryptionKey: "${ENCRYPTION_KEY}"
+xpack.reporting.encryptionKey: "${REPORTING_KEY}"
+xpack.security.encryptionKey: "${SECURITY_KEY}"
+
+# ----- Security Solution (SIEM) -----
+xpack.siem.enabled: true
+xpack.securitySolution.enabled: true
+xpack.securitySolution.maxExceptions: 100
+xpack.endpoint.enabled: true
+
+# ----- Cases -----
+xpack.cases.enabled: true
+
+# ----- Cloud Security Posture -----
+xpack.cloudSecurityPosture.enabled: true
+
+# ----- Monitoring -----
+monitoring.ui.container.elasticsearch.enabled: true
+xpack.monitoring.enabled: true
+monitoring.enabled: true
+
+# ----- Telemetry -----
+telemetry.enabled: false
+telemetry.optIn: false
+
+# ----- Map -----
+map.includeElasticMapsService: false
+
+# ----- Reporting -----
+xpack.reporting.capture.maxAttempts: 3
+xpack.reporting.csv.maxSizeBytes: 26214400
+
+# ----- Logging -----
+logging.dest: /var/log/kibana/kibana.log
+logging.root.level: info
+logging.verbose: false

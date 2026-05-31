@@ -1,0 +1,54 @@
+#===============================================================================
+# Elasticsearch Configuration - SIEM Cluster 9.4.2
+# Path: /etc/elasticsearch/elasticsearch.yml
+#===============================================================================
+
+# ----- Cluster -----
+cluster.name: siem-cluster
+node.name: siem-node-01
+node.roles: [master, data, ingest, transform, remote_cluster_client]
+
+# ----- Paths -----
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+
+# ----- Network -----
+network.host: 0.0.0.0
+http.port: 9200
+transport.port: 9300
+
+# ----- Discovery (Single Node) -----
+discovery.type: single-node
+
+# ----- Security -----
+xpack.security.enabled: true
+xpack.security.enrollment.enabled: false
+xpack.security.authc.api_key.enabled: true
+
+# ----- HTTP SSL/TLS -----
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.key: /etc/elasticsearch/certs/privkey.pem
+xpack.security.http.ssl.certificate: /etc/elasticsearch/certs/fullchain.pem
+xpack.security.http.ssl.certificate_authorities: /etc/elasticsearch/certs/fullchain.pem
+
+# ----- Transport SSL/TLS -----
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.key: /etc/elasticsearch/certs/privkey.pem
+xpack.security.transport.ssl.certificate: /etc/elasticsearch/certs/fullchain.pem
+xpack.security.transport.ssl.certificate_authorities: /etc/elasticsearch/certs/fullchain.pem
+xpack.security.transport.ssl.verification_mode: certificate
+
+# ----- Monitoring -----
+xpack.monitoring.collection.enabled: true
+xpack.monitoring.exporters.my_local:
+  type: local
+
+# ----- Audit -----
+xpack.security.audit.enabled: true
+xpack.security.audit.logfile.events.include: [access_denied, access_granted, authentication_failed, connection_denied, security_config_change, system_access_granted, system_access_denied]
+
+# ----- Recovery -----
+gateway.recover_after_time: 5m
+
+# ----- Snapshot -----
+path.repo: /var/backups/siem

@@ -1,0 +1,80 @@
+version: '3.8'
+
+#===============================================================================
+# Docker Compose for DSIEM - Distributed SIEM Correlation Engine
+# Version: 1.0
+# Source: https://github.com/defenxor/dsiem
+#===============================================================================
+
+services:
+  # NATS Messaging Bus
+  nats:
+    image: nats:latest
+    container_name: dsiem-nats
+    ports:
+      - "4222:4222"   # Client connections
+      - "8222:8222"   # HTTP monitoring
+    volumes:
+      - ./nats-server.conf:/etc/nats/nats-server.conf:ro
+    networks:
+      - dsiem-net
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # DSIEM Frontend Node
+  dsiem-frontend:
+    image: defenxor/dsiem:latest
+    container_name: dsiem-frontend
+    ports:
+      - "8080:8080"   # API HTTP endpoint
+    environment:
+      - DSIEM_MODE=frontend
+      - NATS_SERVERS=nats://nats:4222
+      - LOG_LEVEL=info
+    volumes:
+      - ./config.json:/conf/config.json:ro
+      - ./directives:/conf/directives:ro
+      - ./data/dsiem:/var/log/dsiem
+    depends_on:
+      - nats
+    networks:
+      - dsiem-net
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # DSIEM Backend Nodes (scale horizontally)
+  dsiem-backend:
+    image: defenxor/dsiem:latest
+    container_name: dsiem-backend-01
+    environment:
+      - DSIEM_MODE=backend
+      - NATS_SERVERS=nats://nats:4222
+      - LOG_LEVEL=info
+    volumes:
+      - ./config.json:/conf/config.json:ro
+      - ./plugins:/conf/plugins:ro
+      - ./data/dsiem:/var/log/dsiem
+    depends_on:
+      - nats
+    networks:
+      - dsiem-net
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  dsiem-net:
+    driver: bridge

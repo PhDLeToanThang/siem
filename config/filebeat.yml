@@ -1,0 +1,84 @@
+#===============================================================================
+# Filebeat Configuration - SIEM 9.4.2
+# Path: /etc/filebeat/filebeat.yml
+#===============================================================================
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/*.log
+    - /var/log/syslog
+    - /var/log/auth.log
+    - /var/log/kern.log
+    - /var/log/dmesg
+  fields:
+    event_module: system
+  multiline:
+    pattern: '^\s'
+    match: after
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/access.log
+    - /var/log/nginx/error.log
+  fields:
+    event_module: nginx
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/elasticsearch/*.log
+  fields:
+    event_module: elasticsearch
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/kibana/*.log
+  fields:
+    event_module: kibana
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/logstash/*.log
+  fields:
+    event_module: logstash
+
+# Output to Logstash for processing
+output.logstash:
+  hosts: ["localhost:5044"]
+  ssl.certificate_authorities: ["/etc/filebeat/certs/fullchain.pem"]
+  bulk_max_size: 2048
+  worker: 4
+
+# Kibana setup
+setup.kibana:
+  host: "https://localhost:5601"
+  username: "kibana_system"
+  password: "${KIBANA_PASSWORD}"
+  ssl.certificate_authorities: ["/etc/filebeat/certs/fullchain.pem"]
+
+# Module configuration
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+  reload.period: 10s
+
+# Processors
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+# Logging
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat.log
+  keepfiles: 7
+  permissions: 0600
