@@ -157,7 +157,7 @@ graph TD
 | Tính năng | Mô tả |
 |-----------|-------|
 | **Vector Database** | Lưu trữ và tìm kiếm vector embeddings cho AI/ML |
-| **Piped Query Language (ES|QL)** | Ngôn ngữ truy vấn pipeline mới, mạnh mẽ |
+| **Piped Query Language (ES/QL)** | Ngôn ngữ truy vấn pipeline mới, mạnh mẽ |
 | **Semantic Search** | Tìm kiếm ngữ nghĩa với NLP tích hợp |
 | **AutoOps** | Tự động tối ưu cluster performance |
 | **Workflows** | Kết hợp script automation với AI reasoning |
